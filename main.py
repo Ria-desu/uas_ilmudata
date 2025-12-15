@@ -6,7 +6,7 @@ from scipy import stats
 import datetime
 import os
 
-app = Flask(__name__)
+app = Flask(_name_)
 
 def get_komoditas_list():
     data = pd.read_csv("pangann.csv")
@@ -40,8 +40,10 @@ def train_model(data, komoditas):
     y = df['Harga_Clean'].values
 
     slope, intercept, r, p, std_err = stats.linregress(x, y)
+    r_squared = r ** 2
 
-    return slope, intercept, df
+    return slope, intercept, r_squared, df
+
 
 
 def predict_price(date, slope, intercept):
@@ -90,7 +92,8 @@ def predict():
     bulan = int(request.form['bulan'])
 
     data = load_data()
-    slope, intercept, df = train_model(data, komoditas)
+    slope, intercept, r_squared, df = train_model(data, komoditas)
+    akurasi = r_squared * 100
 
     target_date = datetime.date(tahun, bulan, 1)
     hasil_pred = predict_price(target_date, slope, intercept)
@@ -105,11 +108,13 @@ def predict():
         hasil_prediksi=f"{hasil_pred:,.0f}",
         komoditas=komoditas,
         bulan=bulan,
-        tahun=tahun
+        tahun=tahun,
+        akurasi=f"{akurasi:.2f}"
     )
 
 
 
+
 # ---------------------------- RUN APP -----------------------------
-if __name__ == '__main__':
+if _name_ == '_main_':
     app.run(debug=True)
